@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Desafio Nerd - Quiz e Mini Jogos</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #121212;
+      background-image: url('https://cdn.pixabay.com/photo/2021/11/18/14/29/cat-6805410_1280.jpg');
+      background-size: cover;
+      background-position: center;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      backdrop-filter: brightness(0.4);
+    }
+
+    .quiz-container, .game-container {
+      max-width: 90%;
+      background-color: rgba(30, 30, 30, 0.9);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+      display: none;
+    }
+
+    .question {
+      font-size: 1.2em;
+      margin-bottom: 15px;
+    }
+
+    .options button {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #333;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 1em;
+    }
+
+    .options button:hover {
+      background-color: #555;
+      cursor: pointer;
+    }
+
+    canvas {
+      background: #222;
+      margin-top: 20px;
+    }
+
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 60px);
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .memory-card {
+      width: 60px;
+      height: 60px;
+      background-color: #333;
+      color: white;
+      font-size: 1.5em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Desafio Nerd - Quiz e Mini Jogos</h1>
+  <div class="quiz-container" id="quiz">
+    <div class="question" id="question">Carregando pergunta...</div>
+    <div class="options" id="options"></div>
+  </div>
+
+  <div class="game-container" id="game1">
+    <h2>Mini Quebra-Cabeça</h2>
+    <canvas id="puzzleCanvas" width="300" height="300"></canvas>
+    <p>Toque para mover as peças!</p>
+    <button onclick="startPuzzle()">Reiniciar Quebra-Cabeça</button>
+    <button onclick="nextQuiz()">Próxima Pergunta</button>
+  </div>
+
+  <div class="game-container" id="game2">
+    <h2>Mini Jogo da Velha</h2>
+    <div id="ticTacToe" style="display: grid; grid-template-columns: repeat(3, 100px); gap: 5px; margin-top: 20px;"></div>
+    <button onclick="nextQuiz()">Próxima Pergunta</button>
+  </div>
+
+  <div class="game-container" id="game3">
+    <h2>Mini Jogo da Memória</h2>
+    <div class="memory-grid" id="memoryGame"></div>
+    <button onclick="nextQuiz()">Próxima Pergunta</button>
+  </div>
+
+  <audio id="successSound" src="https://cdn.pixabay.com/audio/2021/08/04/audio_fcc61ba957.mp3"></audio>
+  <audio id="errorSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_d841b4b395.mp3"></audio>
+
+  <script>
+    const questions = [
+      {
+        question: "Qual evento aconteceu em 2024?",
+        options: ["Copa do Mundo no Brasil", "Eleições presidenciais nos EUA", "Descobrimento do Brasil", "Primeiro homem na Lua"],
+        answer: 1
+      },
+      {
+        question: "Qual é o nome do vírus que causou a pandemia de 2020?",
+        options: ["Zika", "Influenza", "Covid-19", "Ebola"],
+        answer: 2
+      },
+      {
+        question: "O que é inteligência artificial?",
+        options: ["Um robô que cozinha", "Tecnologia que simula inteligência humana", "Um jogo de computador", "Um tipo de rede social"],
+        answer: 1
+      }
+    ];
+
+    let currentQuestion = 0;
+
+    const quizEl = document.getElementById('quiz');
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const successSound = document.getElementById('successSound');
+    const errorSound = document.getElementById('errorSound');
+    const games = ["game1", "game2", "game3"];
+
+    function loadQuestion() {
+      quizEl.style.display = 'block';
+      games.forEach(id => document.getElementById(id).style.display = 'none');
+      const q = questions[currentQuestion];
+      questionEl.textContent = q.question;
+      optionsEl.innerHTML = '';
+      q.options.forEach((option, index) => {
+        const btn = document.createElement('button');
+        btn.textContent = option;
+        btn.onclick = () => checkAnswer(index);
+        optionsEl.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected) {
+      if (selected === questions[currentQuestion].answer) {
+        successSound.play();
+        quizEl.style.display = 'none';
+        launchMiniGame(currentQuestion);
+      } else {
+        errorSound.play();
+        navigator.vibrate(300);
+        alert('Resposta incorreta. Tente novamente!');
+      }
+    }
+
+    function nextQuiz() {
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        loadQuestion();
+      } else {
+        alert("Parabéns! Você completou todas as fases!");
+      }
+    }
+
+    function launchMiniGame(index) {
+      const gameId = games[index % games.length];
+      document.getElementById(gameId).style.display = 'block';
+      if (gameId === "game1") startPuzzle();
+      if (gameId === "game2") startTicTacToe();
+      if (gameId === "game3") startMemoryGame();
+    }
+
+    // Mini jogo 1: Quebra-cabeça simples (apenas redesenha quadrado movimentável)
+    function startPuzzle() {
+      const canvas = document.getElementById('puzzleCanvas');
+      const ctx = canvas.getContext('2d');
+      let x = 0, y = 0;
+      const size = 100;
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'lime';
+        ctx.fillRect(x, y, size, size);
+      }
+
+      canvas.addEventListener('click', () => {
+        x = (x + size) % canvas.width;
+        draw();
+      });
+
+      draw();
+    }
+
+    // Mini jogo 2: Jogo da Velha contra si mesmo
+    function startTicTacToe() {
+      const board = Array(9).fill("");
+      const container = document.getElementById('ticTacToe');
+      container.innerHTML = '';
+
+      function checkWin(player) {
+        const wins = [
+          [0,1,2],[3,4,5],[6,7,8],
+          [0,3,6],[1,4,7],[2,5,8],
+          [0,4,8],[2,4,6]
+        ];
+        return wins.some(combo => combo.every(i => board[i] === player));
+      }
+
+      board.forEach((_, i) => {
+        const btn = document.createElement('button');
+        btn.style.width = '100px';
+        btn.style.height = '100px';
+        btn.style.fontSize = '2em';
+        btn.onclick = () => {
+          if (btn.textContent === '') {
+            btn.textContent = 'X';
+            board[i] = 'X';
+            if (checkWin('X')) alert('Você venceu!');
+          }
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    // Mini jogo 3: Jogo da Memória com letras simples
+    function startMemoryGame() {
+      const symbols = ['A','B','C','D','E','F','G','H'];
+      const cards = [...symbols, ...symbols].sort(() => Math.random() - 0.5);
+      const grid = document.getElementById('memoryGame');
+      grid.innerHTML = '';
+
+      let first = null;
+      let lock = false;
+
+      cards.forEach(symbol => {
+        const card = document.createElement('div');
+        card.className = 'memory-card';
+        card.textContent = '?';
+        card.dataset.symbol = symbol;
+
+        card.onclick = () => {
+          if (lock || card.textContent !== '?') return;
+          card.textContent = card.dataset.symbol;
+          if (!first) {
+            first = card;
+          } else {
+            if (first.dataset.symbol === card.dataset.symbol) {
+              first = null;
+            } else {
+              lock = true;
+              setTimeout(() => {
+                first.textContent = '?';
+                card.textContent = '?';
+                first = null;
+                lock = false;
+              }, 800);
+            }
+          }
+        };
+
+        grid.appendChild(card);
+      });
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>
