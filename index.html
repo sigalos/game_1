@@ -128,7 +128,6 @@
     ];
 
     let currentQuestion = 0;
-
     const quizEl = document.getElementById('quiz');
     const questionEl = document.getElementById('question');
     const optionsEl = document.getElementById('options');
@@ -151,6 +150,11 @@
     }
 
     function checkAnswer(selected) {
+      errorSound.pause();
+      errorSound.currentTime = 0;
+      successSound.pause();
+      successSound.currentTime = 0;
+
       if (selected === questions[currentQuestion].answer) {
         successSound.play();
         quizEl.style.display = 'none';
@@ -179,95 +183,106 @@
       if (gameId === "game3") startMemoryGame();
     }
 
-    // Mini jogo 1: Quebra-cabeça simples (apenas redesenha quadrado movimentável)
     function startPuzzle() {
-      const canvas = document.getElementById('puzzleCanvas');
-      const ctx = canvas.getContext('2d');
-      let x = 0, y = 0;
-      const size = 100;
+      const canvas = document.getElementById("puzzleCanvas");
+      const ctx = canvas.getContext("2d");
+      const img = new Image();
+      img.src = "https://cdn.pixabay.com/photo/2017/01/06/19/15/cat-1958371_1280.jpg";
 
-      function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = 'lime';
-        ctx.fillRect(x, y, size, size);
-      }
+      img.onload = () => {
+        const size = 3;
+        const tileSize = canvas.width / size;
+        const tiles = [];
+        for (let y = 0; y < size; y++) {
+          for (let x = 0; x < size; x++) {
+            tiles.push({ x, y });
+          }
+        }
+        tiles.sort(() => Math.random() - 0.5);
 
-      canvas.addEventListener('click', () => {
-        x = (x + size) % canvas.width;
+        canvas.onclick = e => {
+          const col = Math.floor(e.offsetX / tileSize);
+          const row = Math.floor(e.offsetY / tileSize);
+          const idx = row * size + col;
+          tiles[idx] = tiles[(idx + 1) % tiles.length];
+          draw();
+        };
+
+        function draw() {
+          for (let i = 0; i < tiles.length; i++) {
+            const sx = tiles[i].x * tileSize;
+            const sy = tiles[i].y * tileSize;
+            const dx = (i % size) * tileSize;
+            const dy = Math.floor(i / size) * tileSize;
+            ctx.drawImage(img, sx, sy, tileSize, tileSize, dx, dy, tileSize, tileSize);
+          }
+        }
         draw();
-      });
-
-      draw();
+      };
     }
 
-    // Mini jogo 2: Jogo da Velha contra si mesmo
     function startTicTacToe() {
-      const board = Array(9).fill("");
-      const container = document.getElementById('ticTacToe');
-      container.innerHTML = '';
+      const grid = document.getElementById("ticTacToe");
+      grid.innerHTML = "";
+      const cells = Array(9).fill(null);
 
-      function checkWin(player) {
-        const wins = [
-          [0,1,2],[3,4,5],[6,7,8],
-          [0,3,6],[1,4,7],[2,5,8],
-          [0,4,8],[2,4,6]
-        ];
-        return wins.some(combo => combo.every(i => board[i] === player));
-      }
+      cells.forEach((_, i) => {
+        const cell = document.createElement("div");
+        cell.style.height = "100px";
+        cell.style.display = "flex";
+        cell.style.alignItems = "center";
+        cell.style.justifyContent = "center";
+        cell.style.fontSize = "2em";
+        cell.style.backgroundColor = "#444";
+        cell.style.borderRadius = "8px";
+        cell.style.cursor = "pointer";
 
-      board.forEach((_, i) => {
-        const btn = document.createElement('button');
-        btn.style.width = '100px';
-        btn.style.height = '100px';
-        btn.style.fontSize = '2em';
-        btn.onclick = () => {
-          if (btn.textContent === '') {
-            btn.textContent = 'X';
-            board[i] = 'X';
-            if (checkWin('X')) alert('Você venceu!');
+        cell.onclick = () => {
+          if (!cells[i]) {
+            cells[i] = "X";
+            cell.textContent = "X";
+            setTimeout(() => makeAIMove(cells, grid), 500);
           }
         };
-        container.appendChild(btn);
+        grid.appendChild(cell);
       });
     }
 
-    // Mini jogo 3: Jogo da Memória com letras simples
+    function makeAIMove(cells, grid) {
+      const emptyIndexes = cells.map((v, i) => v ? null : i).filter(v => v !== null);
+      if (emptyIndexes.length === 0) return;
+      const move = emptyIndexes[Math.floor(Math.random() * emptyIndexes.length)];
+      cells[move] = "O";
+      grid.children[move].textContent = "O";
+    }
+
     function startMemoryGame() {
-      const symbols = ['A','B','C','D','E','F','G','H'];
-      const cards = [...symbols, ...symbols].sort(() => Math.random() - 0.5);
-      const grid = document.getElementById('memoryGame');
-      grid.innerHTML = '';
+      const container = document.getElementById("memoryGame");
+      container.innerHTML = "";
+      const emojis = ["🐱", "🐶", "🐰", "🦊", "🐼", "🐵"].flatMap(e => [e, e]);
+      emojis.sort(() => Math.random() - 0.5);
 
-      let first = null;
-      let lock = false;
-
-      cards.forEach(symbol => {
-        const card = document.createElement('div');
-        card.className = 'memory-card';
-        card.textContent = '?';
-        card.dataset.symbol = symbol;
-
+      let selected = [];
+      emojis.forEach((emoji, i) => {
+        const card = document.createElement("div");
+        card.className = "memory-card";
+        card.dataset.index = i;
+        card.dataset.emoji = emoji;
         card.onclick = () => {
-          if (lock || card.textContent !== '?') return;
-          card.textContent = card.dataset.symbol;
-          if (!first) {
-            first = card;
-          } else {
-            if (first.dataset.symbol === card.dataset.symbol) {
-              first = null;
-            } else {
-              lock = true;
-              setTimeout(() => {
-                first.textContent = '?';
-                card.textContent = '?';
-                first = null;
-                lock = false;
-              }, 800);
-            }
+          if (card.textContent || selected.length === 2) return;
+          card.textContent = emoji;
+          selected.push(card);
+          if (selected.length === 2) {
+            setTimeout(() => {
+              if (selected[0].dataset.emoji !== selected[1].dataset.emoji) {
+                selected[0].textContent = "";
+                selected[1].textContent = "";
+              }
+              selected = [];
+            }, 1000);
           }
         };
-
-        grid.appendChild(card);
+        container.appendChild(card);
       });
     }
 
