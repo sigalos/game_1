@@ -9,36 +9,36 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #181818; /* Tom mais escuro para um visual "nerd" */
-      color: #f0f0f0; /* Texto mais claro para contraste */
+      background-color: #181818;
+      color: #f0f0f0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start; /* Alinhar o conteúdo ao topo inicialmente */
+      justify-content: flex-start;
       min-height: 100vh;
-      padding-top: 20px; /* Espaçamento superior */
+      padding-top: 20px;
       box-sizing: border-box;
     }
 
     h1 {
-      color: #5cb85c; /* Cor vibrante para o título */
+      color: #5cb85c;
       margin-bottom: 20px;
       text-align: center;
     }
 
     main {
-      max-width: 80%; /* Largura um pouco menor para focar no conteúdo */
-      background-color: rgba(40, 40, 40, 0.9); /* Fundo mais escuro e levemente transparente */
+      max-width: 80%;
+      background-color: rgba(40, 40, 40, 0.9);
       padding: 30px;
-      border-radius: 15px; /* Bordas mais arredondadas */
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada */
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       margin-bottom: 30px;
-      display: none; /* Oculto inicialmente */
+      display: none;
       text-align: center;
     }
 
     .question {
-      font-size: 1.4em; /* Fonte um pouco maior */
+      font-size: 1.4em;
       margin-bottom: 25px;
       color: #eee;
     }
@@ -46,18 +46,18 @@
     .options {
       display: flex;
       flex-direction: column;
-      gap: 15px; /* Espaçamento entre os botões */
+      gap: 15px;
     }
 
     .options button {
       padding: 12px 20px;
-      background-color: #337ab7; /* Cor primária para os botões */
+      background-color: #337ab7;
       border: none;
       border-radius: 10px;
       color: white;
       font-size: 1.1em;
       cursor: pointer;
-      transition: background-color 0.3s ease; /* Transição suave no hover */
+      transition: background-color 0.3s ease;
     }
 
     .options button:hover {
@@ -77,7 +77,7 @@
 
     .btn-restart {
       padding: 12px 25px;
-      background-color: #d9534f; /* Cor de destaque para reiniciar */
+      background-color: #d9534f;
       color: white;
       border: none;
       border-radius: 10px;
@@ -125,6 +125,75 @@
     .share-button:hover {
       opacity: 0.8;
     }
+
+    /* Estilos básicos para o Jogo da Velha */
+    .tic-tac-toe-board {
+      display: grid;
+      grid-template-columns: repeat(3, 80px);
+      grid-gap: 5px;
+      margin-top: 20px;
+    }
+
+    .tic-tac-toe-cell {
+      width: 80px;
+      height: 80px;
+      background-color: #333;
+      color: white;
+      font-size: 2em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    /* Estilos básicos para o Quebra-Cabeça */
+    .puzzle-container {
+      display: grid;
+      grid-template-columns: repeat(3, 60px);
+      grid-template-rows: repeat(3, 60px);
+      gap: 5px;
+      margin-top: 20px;
+    }
+
+    .puzzle-piece {
+      width: 60px;
+      height: 60px;
+      background-color: #555;
+      color: white;
+      font-size: 1.5em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      border-radius: 5px;
+    }
+
+    /* Estilos básicos para o Jogo da Memória */
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 70px);
+      grid-gap: 10px;
+      margin-top: 20px;
+    }
+
+    .memory-card {
+      width: 70px;
+      height: 70px;
+      background-color: #444;
+      color: white;
+      font-size: 1.5em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .memory-card.flipped {
+      /* Estilo quando a carta é virada */
+      background-color: #777;
+    }
   </style>
 </head>
 <body>
@@ -134,7 +203,8 @@
     <div id="options" class="options"></div>
   </main>
 
-  <div id="game" class="game-container"></div>
+  <div id="game" class="game-container">
+    </div>
 
   <button class="btn-restart" onclick="restartQuiz()" title="Clique para reiniciar o quiz e o jogo.">Reiniciar Quiz</button>
 
@@ -216,6 +286,77 @@
       finalScoreContainer.style.display = "none";
     }
 
+    // --- JOGO DA VELHA ---
+    function loadTicTacToe() {
+      gameContainer.innerHTML = `
+        <p>Jogo da Velha (vs IA)</p>
+        <div class="tic-tac-toe-board">
+          <div class="tic-tac-toe-cell" onclick="playTicTacToe(0)"></div>
+          <div class="tic-tac-toe-cell" onclick="playTicTacToe(1)"></div>
+          <div class="tic-tac-toe-cell" onclick="playTicTacToe(2)"></div>
+          <div class="tic-tac-toe-cell" onclick="playTicTacToe(3)"></div>
+          <div class="tic-tac-toe-cell" onclick="playTicTacToe(4)"></div>
+          <div class="tic-tac-toe-cell" onclick="playTicTacToe(5)"></div>
+          <div class="tic-tac-toe-cell" onclick="playTicTacToe(6)"></div>
+          <div class="tic-tac-toe-cell" onclick="playTicTacToe(7)"></div>
+          <div class="tic-tac-toe-cell" onclick="playTicTacToe(8)"></div>
+        </div>
+        <div id="tic-tac-toe-message"></div>
+      `;
+      // Aqui você implementaria a lógica do jogo da velha (jogada do jogador, IA, verificação de vitória)
+    }
+
+    function playTicTacToe(cellIndex) {
+      const cell = document.querySelectorAll('.tic-tac-toe-cell')[cellIndex];
+      if (cell.innerText === '') {
+        cell.innerText = 'X';
+        // Aqui você chamaria a lógica da IA para fazer sua jogada
+        // e depois verificaria se houve um vencedor
+      }
+    }
+
+    // --- QUEBRA-CABEÇA ---
+    function loadPuzzle() {
+      gameContainer.innerHTML = `
+        <p>Quebra-Cabeça</p>
+        <div class="puzzle-container" id="puzzle">
+          <div class="puzzle-piece">1</div>
+          <div class="puzzle-piece">2</div>
+          <div class="puzzle-piece">3</div>
+          <div class="puzzle-piece">4</div>
+          <div class="puzzle-piece">5</div>
+          <div class="puzzle-piece">6</div>
+          <div class="puzzle-piece">7</div>
+          <div class="puzzle-piece">8</div>
+          <div class="puzzle-piece empty"></div>
+        </div>
+        <div id="puzzle-message"></div>
+      `;
+      // Aqui você implementaria a lógica do quebra-cabeça (arrastar e soltar, verificar se está completo)
+    }
+
+    // --- JOGO DA MEMÓRIA ---
+    function loadMemoryGame() {
+      const cards = ['A', 'A', 'B', 'B', 'C', 'C', 'D', 'D'];
+      cards.sort(() => 0.5 - Math.random()); // Embaralhar as cartas
+
+      let memoryGridHTML = '<div class="memory-grid">';
+      cards.forEach((card, index) => {
+        memoryGridHTML += `
+          <div class="memory-card" data-card="${card}" data-index="${index}" onclick="flipCard(this)">?</div>
+        `;
+      });
+      memoryGridHTML += '</div><div id="memory-message"></div>';
+      gameContainer.innerHTML = `<p>Jogo da Memória</p>${memoryGridHTML}`;
+      // Aqui você implementaria a lógica do jogo da memória (virar cartas, verificar pares)
+    }
+
+    function flipCard(cardElement) {
+      cardElement.classList.add('flipped');
+      cardElement.innerText = cardElement.dataset.card;
+      // Aqui você implementaria a lógica para verificar se é um par
+    }
+
     function showMiniGameSection(gameIndex) {
       gameContainer.innerHTML = "";
       gameContainer.style.display = "block";
@@ -223,14 +364,11 @@
       finalScoreContainer.style.display = "none";
 
       if (gameIndex === 0) {
-        gameContainer.innerHTML = '<p>Jogo da Velha (vs IA)</p>';
-        // Aqui será implementado o jogo da velha com IA
+        loadTicTacToe();
       } else if (gameIndex === 1) {
-        gameContainer.innerHTML = '<p>Quebra-Cabeça</p>';
-        // Aqui será implementado o quebra-cabeça simples
+        loadPuzzle();
       } else {
-        gameContainer.innerHTML = '<p>Jogo da Memória</p>';
-        // Aqui será implementado o jogo da memória simples
+        loadMemoryGame();
       }
 
       setTimeout(() => {
@@ -239,7 +377,7 @@
         } else {
           showFinalScore();
         }
-      }, 8000);
+      }, 15000); // Aumentei o tempo para dar tempo de ver a estrutura do jogo
     }
 
     function checkAnswer(selected) {
@@ -269,7 +407,7 @@
       const tweetText = encodeURIComponent(`Acertei ${score} de ${questions.length} no Desafio Nerd!`);
       shareTwitter.href = `https://twitter.com/intent/tweet?text=${tweetText}`;
 
-      const facebookUrl = encodeURIComponent(window.location.href); // Compartilha o link do jogo
+      const facebookUrl = encodeURIComponent(window.location.href);
       shareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${facebookUrl}`;
     }
 
