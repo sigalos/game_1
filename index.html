@@ -77,11 +77,147 @@
       cursor: pointer;
       border-radius: 6px;
     }
+
+    .btn-restart {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #444;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn-restart:hover {
+      background-color: #666;
+    }
   </style>
 </head>
 <body>
   <h1>Desafio Nerd - Quiz e Mini Jogos</h1>
-  <!-- restante do conteúdo HTML permanece inalterado -->
+  <div id="quiz" class="quiz-container">
+    <div id="question" class="question"></div>
+    <div id="options" class="options"></div>
+  </div>
+
+  <div id="game" class="game-container"></div>
+
+  <button class="btn-restart" onclick="restartQuiz()">Reiniciar Quiz</button>
+
+  <audio id="correctSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+  <audio id="wrongSound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+
+  <script>
+    const questions = [
+      {
+        question: "Quem é o atual presidente do Brasil?",
+        options: ["Lula", "Bolsonaro", "Dilma", "Temer"],
+        answer: 0
+      },
+      {
+        question: "Qual é a capital do Brasil?",
+        options: ["São Paulo", "Rio de Janeiro", "Brasília", "Belo Horizonte"],
+        answer: 2
+      },
+      {
+        question: "Quantos estados tem o Brasil?",
+        options: ["25", "26", "27", "28"],
+        answer: 2
+      },
+      {
+        question: "Qual animal é símbolo da páscoa?",
+        options: ["Gato", "Coelho", "Cavalo", "Urso"],
+        answer: 1
+      },
+      {
+        question: "Qual planeta é o terceiro do Sol?",
+        options: ["Marte", "Terra", "Vênus", "Júpiter"],
+        answer: 1
+      },
+      {
+        question: "Em que continente está o Brasil?",
+        options: ["Europa", "América do Sul", "Ásia", "África"],
+        answer: 1
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    function playSound(correct) {
+      document.getElementById(correct ? 'correctSound' : 'wrongSound').play();
+    }
+
+    function showQuestion() {
+      const q = questions[currentQuestion];
+      document.getElementById("question").innerText = q.question;
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+      q.options.forEach((opt, index) => {
+        const btn = document.createElement("button");
+        btn.innerText = opt;
+        btn.onclick = () => checkAnswer(index);
+        optionsDiv.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected) {
+      const correct = questions[currentQuestion].answer === selected;
+      playSound(correct);
+      if (correct) score++;
+      currentQuestion++;
+
+      if (currentQuestion < questions.length) {
+        if (currentQuestion % 2 === 0) {
+          showMiniGame();
+        } else {
+          showQuestion();
+        }
+      } else {
+        document.getElementById("quiz").style.display = "none";
+        document.getElementById("game").innerHTML = `<h2>Parabéns! Você acertou ${score} de ${questions.length} perguntas.</h2>`;
+        document.getElementById("game").style.display = "block";
+      }
+    }
+
+    function showMiniGame() {
+      const gameDiv = document.getElementById("game");
+      gameDiv.innerHTML = "";
+      gameDiv.style.display = "block";
+
+      const gameIndex = Math.floor(currentQuestion / 2) % 3;
+      if (gameIndex === 0) {
+        gameDiv.innerHTML = '<p>Jogo da Velha (vs IA)</p>';
+        // Aqui será implementado o jogo da velha com IA
+      } else if (gameIndex === 1) {
+        gameDiv.innerHTML = '<p>Quebra-Cabeça</p>';
+        // Aqui será implementado o quebra-cabeça simples
+      } else {
+        gameDiv.innerHTML = '<p>Jogo da Memória</p>';
+        // Aqui será implementado o jogo da memória simples
+      }
+
+      setTimeout(() => {
+        gameDiv.style.display = "none";
+        document.getElementById("quiz").style.display = "block";
+        showQuestion();
+      }, 8000);
+    }
+
+    function startQuiz() {
+      document.getElementById("quiz").style.display = "block";
+      showQuestion();
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      score = 0;
+      document.getElementById("game").style.display = "none";
+      startQuiz();
+    }
+
+    startQuiz();
+  </script>
 </body>
 </html>
 
