@@ -8,101 +8,143 @@
   <style>
     body {
       margin: 0;
-      font-family: sans-serif;
-      background-color: #121212;
-      background-image: url('https://cdn.pixabay.com/photo/2020/11/25/13/15/cat-5775803_1280.jpg'), url('https://cdn.pixabay.com/photo/2021/11/18/14/29/cat-6805410_1280.jpg');
-      background-size: cover;
-      background-position: center;
-      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #181818; /* Tom mais escuro para um visual "nerd" */
+      color: #f0f0f0; /* Texto mais claro para contraste */
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start; /* Alinhar o conteúdo ao topo inicialmente */
       min-height: 100vh;
-      backdrop-filter: brightness(0.4);
+      padding-top: 20px; /* Espaçamento superior */
+      box-sizing: border-box;
     }
 
-    .quiz-container, .game-container {
-      max-width: 90%;
-      background-color: rgba(30, 30, 30, 0.9);
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-      display: none;
+    h1 {
+      color: #5cb85c; /* Cor vibrante para o título */
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    main {
+      max-width: 80%; /* Largura um pouco menor para focar no conteúdo */
+      background-color: rgba(40, 40, 40, 0.9); /* Fundo mais escuro e levemente transparente */
+      padding: 30px;
+      border-radius: 15px; /* Bordas mais arredondadas */
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada */
+      margin-bottom: 30px;
+      display: none; /* Oculto inicialmente */
+      text-align: center;
     }
 
     .question {
-      font-size: 1.2em;
-      margin-bottom: 15px;
+      font-size: 1.4em; /* Fonte um pouco maior */
+      margin-bottom: 25px;
+      color: #eee;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 15px; /* Espaçamento entre os botões */
     }
 
     .options button {
-      display: block;
-      width: 100%;
-      margin: 10px 0;
-      padding: 10px;
-      background-color: #333;
+      padding: 12px 20px;
+      background-color: #337ab7; /* Cor primária para os botões */
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       color: white;
-      font-size: 1em;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: background-color 0.3s ease; /* Transição suave no hover */
     }
 
     .options button:hover {
-      background-color: #555;
-      cursor: pointer;
+      background-color: #286090;
     }
 
-    canvas {
-      background: #222;
-      margin-top: 20px;
-    }
-
-    .memory-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 60px);
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .memory-card {
-      width: 60px;
-      height: 60px;
-      background-color: #333;
-      color: white;
-      font-size: 1.5em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      border-radius: 6px;
+    .game-container {
+      background-color: rgba(40, 40, 40, 0.9);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      margin-bottom: 30px;
+      display: none;
+      text-align: center;
+      color: #eee;
     }
 
     .btn-restart {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #444;
+      padding: 12px 25px;
+      background-color: #d9534f; /* Cor de destaque para reiniciar */
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
+      font-size: 1.1em;
+      transition: background-color 0.3s ease;
+      margin-top: 20px;
     }
 
     .btn-restart:hover {
-      background-color: #666;
+      background-color: #c9302c;
+    }
+
+    .final-message {
+      font-size: 1.6em;
+      color: #5cb85c;
+      margin-bottom: 20px;
+    }
+
+    .share-buttons {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .share-button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-size: 1em;
+      text-decoration: none;
+    }
+
+    .share-button.twitter {
+      background-color: #1da1f2;
+    }
+
+    .share-button.facebook {
+      background-color: #1877f2;
+    }
+
+    .share-button:hover {
+      opacity: 0.8;
     }
   </style>
 </head>
 <body>
   <h1>Desafio Nerd - Quiz e Mini Jogos</h1>
-  <div id="quiz" class="quiz-container">
+  <main id="quiz">
     <div id="question" class="question"></div>
     <div id="options" class="options"></div>
-  </div>
+  </main>
 
   <div id="game" class="game-container"></div>
 
-  <button class="btn-restart" onclick="restartQuiz()">Reiniciar Quiz</button>
+  <button class="btn-restart" onclick="restartQuiz()" title="Clique para reiniciar o quiz e o jogo.">Reiniciar Quiz</button>
+
+  <div id="final-score" class="game-container" style="display: none;">
+    <h2 class="final-message"></h2>
+    <div class="share-buttons">
+      <a id="share-twitter" class="share-button twitter" target="_blank" rel="noopener noreferrer">Compartilhar no Twitter</a>
+      <a id="share-facebook" class="share-button facebook" target="_blank" rel="noopener noreferrer">Compartilhar no Facebook</a>
+    </div>
+  </div>
 
   <audio id="correctSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
   <audio id="wrongSound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
@@ -144,21 +186,60 @@
     let currentQuestion = 0;
     let score = 0;
 
-    function playSound(correct) {
-      document.getElementById(correct ? 'correctSound' : 'wrongSound').play();
+    const quizContainer = document.getElementById("quiz");
+    const gameContainer = document.getElementById("game");
+    const finalScoreContainer = document.getElementById("final-score");
+    const questionElement = document.getElementById("question");
+    const optionsElement = document.getElementById("options");
+    const correctSound = document.getElementById("correctSound");
+    const wrongSound = document.getElementById("wrongSound");
+    const shareTwitter = document.getElementById("share-twitter");
+    const shareFacebook = document.getElementById("share-facebook");
+
+    function playSound(isCorrect) {
+      (isCorrect ? correctSound : wrongSound).play();
     }
 
     function showQuestion() {
       const q = questions[currentQuestion];
-      document.getElementById("question").innerText = q.question;
-      const optionsDiv = document.getElementById("options");
-      optionsDiv.innerHTML = "";
+      questionElement.innerText = q.question;
+      optionsElement.innerHTML = "";
       q.options.forEach((opt, index) => {
         const btn = document.createElement("button");
         btn.innerText = opt;
+        btn.setAttribute('aria-label', `Opção ${index + 1}: ${opt}`);
         btn.onclick = () => checkAnswer(index);
-        optionsDiv.appendChild(btn);
+        optionsElement.appendChild(btn);
       });
+      quizContainer.style.display = "block";
+      gameContainer.style.display = "none";
+      finalScoreContainer.style.display = "none";
+    }
+
+    function showMiniGameSection(gameIndex) {
+      gameContainer.innerHTML = "";
+      gameContainer.style.display = "block";
+      quizContainer.style.display = "none";
+      finalScoreContainer.style.display = "none";
+
+      if (gameIndex === 0) {
+        gameContainer.innerHTML = '<p>Jogo da Velha (vs IA)</p>';
+        // Aqui será implementado o jogo da velha com IA
+      } else if (gameIndex === 1) {
+        gameContainer.innerHTML = '<p>Quebra-Cabeça</p>';
+        // Aqui será implementado o quebra-cabeça simples
+      } else {
+        gameContainer.innerHTML = '<p>Jogo da Memória</p>';
+        // Aqui será implementado o jogo da memória simples
+      }
+
+      setTimeout(() => {
+        if (currentQuestion < questions.length) {
+          showQuestion();
+        } else {
+          showFinalScore();
+        }
+      }, 8000);
     }
 
     function checkAnswer(selected) {
@@ -169,50 +250,36 @@
 
       if (currentQuestion < questions.length) {
         if (currentQuestion % 2 === 0) {
-          showMiniGame();
+          const gameIndex = Math.floor(currentQuestion / 2) % 3;
+          showMiniGameSection(gameIndex);
         } else {
           showQuestion();
         }
       } else {
-        document.getElementById("quiz").style.display = "none";
-        document.getElementById("game").innerHTML = `<h2>Parabéns! Você acertou ${score} de ${questions.length} perguntas.</h2>`;
-        document.getElementById("game").style.display = "block";
+        showFinalScore();
       }
     }
 
-    function showMiniGame() {
-      const gameDiv = document.getElementById("game");
-      gameDiv.innerHTML = "";
-      gameDiv.style.display = "block";
+    function showFinalScore() {
+      finalScoreContainer.querySelector('h2').innerText = `Parabéns! Você acertou ${score} de ${questions.length} perguntas.`;
+      finalScoreContainer.style.display = "block";
+      quizContainer.style.display = "none";
+      gameContainer.style.display = "none";
 
-      const gameIndex = Math.floor(currentQuestion / 2) % 3;
-      if (gameIndex === 0) {
-        gameDiv.innerHTML = '<p>Jogo da Velha (vs IA)</p>';
-        // Aqui será implementado o jogo da velha com IA
-      } else if (gameIndex === 1) {
-        gameDiv.innerHTML = '<p>Quebra-Cabeça</p>';
-        // Aqui será implementado o quebra-cabeça simples
-      } else {
-        gameDiv.innerHTML = '<p>Jogo da Memória</p>';
-        // Aqui será implementado o jogo da memória simples
-      }
+      const tweetText = encodeURIComponent(`Acertei ${score} de ${questions.length} no Desafio Nerd!`);
+      shareTwitter.href = `https://twitter.com/intent/tweet?text=${tweetText}`;
 
-      setTimeout(() => {
-        gameDiv.style.display = "none";
-        document.getElementById("quiz").style.display = "block";
-        showQuestion();
-      }, 8000);
+      const facebookUrl = encodeURIComponent(window.location.href); // Compartilha o link do jogo
+      shareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${facebookUrl}`;
     }
 
     function startQuiz() {
-      document.getElementById("quiz").style.display = "block";
+      currentQuestion = 0;
+      score = 0;
       showQuestion();
     }
 
     function restartQuiz() {
-      currentQuestion = 0;
-      score = 0;
-      document.getElementById("game").style.display = "none";
       startQuiz();
     }
 
@@ -220,4 +287,3 @@
   </script>
 </body>
 </html>
-
