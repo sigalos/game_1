@@ -3,33 +3,277 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Desafio Nerd - Quiz e Mini Jogos</title>
-  <link rel="icon" href="https://cdn.pixabay.com/photo/2016/08/05/06/47/brain-1571928_1280.png" type="image/png">
-  <link rel="stylesheet" href="styles.css">
+  <title>Desafio Nerd</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #121212 url('https://placekitten.com/800/600') repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      text-align: center;
+    }
+    .container {
+      margin: 30px auto;
+      max-width: 500px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 10px;
+      box-shadow: 0 0 15px #000;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-top: 20px;
+      color: #00ffc8;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 5px;
+      background-color: #00ffc8;
+      color: #000;
+      cursor: pointer;
+    }
+    .question {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+    }
+    .options button {
+      display: block;
+      width: 100%;
+      margin: 5px 0;
+      background-color: #333;
+      color: #fff;
+      border: 1px solid #00ffc8;
+    }
+    .result {
+      font-size: 1.5rem;
+      margin: 20px;
+    }
+    #emoji {
+      font-size: 3rem;
+    }
+    #shareButton {
+      display: none;
+      margin-top: 20px;
+      background: #25d366;
+      color: white;
+    }
+    #tictactoe {
+      display: none;
+      margin-top: 20px;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+    .cell {
+      width: 90px;
+      height: 90px;
+      font-size: 2rem;
+      background: #222;
+      border: 2px solid #00ffc8;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cell.winner {
+      background: #00ffc8;
+      color: #000;
+    }
+  </style>
 </head>
 <body>
-  <h1>Desafio Nerd - Quiz e Mini Jogos</h1>
-  <main id="quiz">
+  <h1>🐱 Desafio Nerd 🧠</h1>
+  <div class="container" id="levelSelect">
+    <p>Escolha o nível de dificuldade para começar:</p>
+    <button onclick="startGame('fácil')">Fácil</button>
+    <button onclick="startGame('médio')">Médio</button>
+    <button onclick="startGame('difícil')">Difícil</button>
+  </div>
+
+  <div class="container" id="quiz" style="display:none">
     <div id="question" class="question"></div>
     <div id="options" class="options"></div>
-  </main>
-
-  <div id="game" class="game-container">
   </div>
 
-  <button class="btn-restart" onclick="restartQuiz()" title="Clique para reiniciar o quiz e o jogo.">Reiniciar Quiz</button>
-
-  <div id="final-score" class="game-container" style="display: none;">
-    <h2 class="final-message"></h2>
-    <div class="share-buttons">
-      <a id="share-twitter" class="share-button twitter" target="_blank" rel="noopener noreferrer">Compartilhar no Twitter</a>
-      <a id="share-facebook" class="share-button facebook" target="_blank" rel="noopener noreferrer">Compartilhar no Facebook</a>
-    </div>
+  <div class="container" id="tictactoe">
+    <h2>Mini Jogo: Jogo da Velha 🤖</h2>
+    <div class="board" id="board"></div>
+    <p id="tictactoeMsg"></p>
+    <button onclick="continueQuiz()">Continuar Quiz</button>
   </div>
 
-  <audio id="correctSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
-  <audio id="wrongSound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+  <div class="container" id="result" style="display:none">
+    <div class="result">Sua pontuação: <span id="score"></span></div>
+    <div id="emoji"></div>
+    <button id="shareButton" onclick="shareResult()">Compartilhar no WhatsApp</button>
+  </div>
 
-  <script src="script.js"></script>
+  <script>
+    const questions = {
+      "fácil": [
+        { question: "Qual é a cor do céu em um dia ensolarado?", options: ["Azul", "Verde", "Vermelho"], answer: 0 },
+        { question: "Quantos dedos temos em uma mão?", options: ["5", "4", "6"], answer: 0 },
+        { question: "Qual animal faz 'miau'?", options: ["Cachorro", "Gato", "Pássaro"], answer: 1 },
+        { question: "Qual o oposto de quente?", options: ["Frio", "Gelado", "Morno"], answer: 0 },
+        { question: "Qual desses é um meio de transporte?", options: ["Carro", "Cadeira", "Mesa"], answer: 0 },
+        { question: "O que usamos para escrever?", options: ["Lápis", "Colher", "Copo"], answer: 0 },
+        { question: "O que é maior: um elefante ou um gato?", options: ["Gato", "Elefante", "Iguais"], answer: 1 },
+        { question: "Qual desses é um alimento?", options: ["Banana", "Pedra", "Chave"], answer: 0 },
+        { question: "O que usamos para ver?", options: ["Olhos", "Boca", "Ouvidos"], answer: 0 },
+        { question: "Qual o som de um cachorro?", options: ["Miau", "Au au", "Piu piu"], answer: 1 }
+      ],
+      "médio": [
+        { question: "Qual planeta é conhecido como Planeta Vermelho?", options: ["Marte", "Terra", "Júpiter"], answer: 0 },
+        { question: "Quem escreveu 'Dom Casmurro'?", options: ["Machado de Assis", "Carlos Drummond", "Clarice Lispector"], answer: 0 },
+        { question: "Quantos lados tem um hexágono?", options: ["6", "5", "7"], answer: 0 },
+        { question: "Qual é o maior oceano do mundo?", options: ["Atlântico", "Índico", "Pacífico"], answer: 2 },
+        { question: "Qual gás respiramos do ar?", options: ["Oxigênio", "Hidrogênio", "Nitrogênio"], answer: 0 },
+        { question: "Quem pintou a Mona Lisa?", options: ["Van Gogh", "Leonardo da Vinci", "Picasso"], answer: 1 },
+        { question: "Qual a capital do Brasil?", options: ["Rio de Janeiro", "São Paulo", "Brasília"], answer: 2 },
+        { question: "Qual é o número PI (aproximado)?", options: ["3,14", "4,13", "2,71"], answer: 0 },
+        { question: "Qual é a raiz quadrada de 81?", options: ["9", "8", "7"], answer: 0 },
+        { question: "O que é H2O?", options: ["Água", "Oxigênio", "Sal"], answer: 0 }
+      ],
+      "difícil": [
+        { question: "Qual é a fórmula da área do círculo?", options: ["πr²", "2πr", "πd"], answer: 0 },
+        { question: "Quem descobriu a gravidade?", options: ["Newton", "Einstein", "Galileu"], answer: 0 },
+        { question: "Qual o elemento químico de símbolo Fe?", options: ["Ferro", "Fósforo", "Flúor"], answer: 0 },
+        { question: "Em que ano terminou a Segunda Guerra Mundial?", options: ["1945", "1939", "1950"], answer: 0 },
+        { question: "Qual a capital da Austrália?", options: ["Sydney", "Melbourne", "Canberra"], answer: 2 },
+        { question: "Qual é o valor de 2 elevado à 10ª potência?", options: ["1024", "512", "2048"], answer: 0 },
+        { question: "Quem escreveu 'A Origem das Espécies'?", options: ["Darwin", "Newton", "Freud"], answer: 0 },
+        { question: "Qual o maior osso do corpo humano?", options: ["Fêmur", "Úmero", "Tíbia"], answer: 0 },
+        { question: "Qual é o idioma mais falado no mundo?", options: ["Chinês mandarim", "Espanhol", "Inglês"], answer: 0 },
+        { question: "Qual é a capital do Canadá?", options: ["Toronto", "Vancouver", "Ottawa"], answer: 2 }
+      ]
+    };
+
+    let currentLevel = '';
+    let currentIndex = 0;
+    let score = 0;
+    let board = [];
+    let isGameActive = false;
+
+    function startGame(level) {
+      currentLevel = level;
+      currentIndex = 0;
+      score = 0;
+      document.getElementById('levelSelect').style.display = 'none';
+      document.getElementById('quiz').style.display = 'block';
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const q = questions[currentLevel][currentIndex];
+      document.getElementById('question').innerText = q.question;
+      const optionsDiv = document.getElementById('options');
+      optionsDiv.innerHTML = '';
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.innerText = opt;
+        btn.onclick = () => checkAnswer(i);
+        optionsDiv.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected) {
+      if (selected === questions[currentLevel][currentIndex].answer) score++;
+      currentIndex++;
+
+      if (currentIndex % 2 === 0 && currentIndex < questions[currentLevel].length) {
+        document.getElementById('quiz').style.display = 'none';
+        startTicTacToe();
+      } else if (currentIndex >= questions[currentLevel].length) {
+        finishGame();
+      } else {
+        showQuestion();
+      }
+    }
+
+    function startTicTacToe() {
+      isGameActive = true;
+      board = Array(9).fill('');
+      const boardDiv = document.getElementById('board');
+      boardDiv.innerHTML = '';
+      board.forEach((_, i) => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.addEventListener('click', () => makeMove(i));
+        boardDiv.appendChild(cell);
+      });
+      document.getElementById('tictactoe').style.display = 'block';
+      document.getElementById('tictactoeMsg').innerText = '';
+    }
+
+    function makeMove(index) {
+      if (!isGameActive || board[index]) return;
+      board[index] = 'X';
+      updateBoard();
+      if (checkWinner('X')) return endTicTacToe('Você venceu! 😺');
+      if (board.every(cell => cell)) return endTicTacToe('Empate! 😐');
+
+      setTimeout(() => {
+        const empty = board.map((v, i) => v === '' ? i : null).filter(v => v !== null);
+        const move = empty[Math.floor(Math.random() * empty.length)];
+        board[move] = 'O';
+        updateBoard();
+        if (checkWinner('O')) return endTicTacToe('O computador venceu! 😿');
+        if (board.every(cell => cell)) return endTicTacToe('Empate! 😐');
+      }, 500);
+    }
+
+    function updateBoard() {
+      const boardDiv = document.getElementById('board');
+      Array.from(boardDiv.children).forEach((cell, i) => {
+        cell.textContent = board[i];
+      });
+    }
+
+    function checkWinner(player) {
+      const wins = [
+        [0,1,2], [3,4,5], [6,7,8],
+        [0,3,6], [1,4,7], [2,5,8],
+        [0,4,8], [2,4,6]
+      ];
+      return wins.some(combo => combo.every(i => board[i] === player));
+    }
+
+    function endTicTacToe(message) {
+      isGameActive = false;
+      document.getElementById('tictactoeMsg').innerText = message;
+    }
+
+    function continueQuiz() {
+      document.getElementById('tictactoe').style.display = 'none';
+      document.getElementById('quiz').style.display = 'block';
+      showQuestion();
+    }
+
+    function finishGame() {
+      document.getElementById('quiz').style.display = 'none';
+      document.getElementById('result').style.display = 'block';
+      const percent = Math.round((score / 10) * 100);
+      document.getElementById('score').innerText = `${score} / 10 (${percent}%)`;
+      const emoji = percent >= 70 ? '😺' : percent >= 40 ? '😐' : '😿';
+      document.getElementById('emoji').innerText = emoji;
+      document.getElementById('shareButton').style.display = 'inline-block';
+    }
+
+    function shareResult() {
+      const scoreText = document.getElementById('score').innerText;
+      const emoji = document.getElementById('emoji').innerText;
+      const msg = encodeURIComponent(`Minha pontuação no Desafio Nerd: ${scoreText} ${emoji}`);
+      window.open(`https://wa.me/?text=${msg}`, '_blank');
+    }
+  </script>
 </body>
 </html>
+
